@@ -1,0 +1,22 @@
+.post_list_widget_form_container textarea {
+	width:100%;
+}
+
+.post_list_widget_form_fields_btns,
+.post_list_widget_form_taxonomies_btns {
+	line-height: 2;
+}
+
+.post_list_widget_form_fields_btns span,
+.post_list_widget_form_taxonomies_btns span{
+	padding:1px;
+	margin:2px;
+	background:#eee;
+	border:1px solid #ddd;
+	cursor:pointer;
+}
+
+.post_list_widget_form_btns span:hover {
+	background:#ddd;
+	border:1px solid #ccc;
+}
