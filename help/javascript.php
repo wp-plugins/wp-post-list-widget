@@ -1,0 +1,1 @@
+To print the list into a javascript array enter the name of the variable.

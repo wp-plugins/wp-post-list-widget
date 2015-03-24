@@ -1,5 +1,10 @@
+.post_list_widget_form_container div {
+	margin:10px 0;
+}
+
 .post_list_widget_form_container textarea {
 	width:100%;
+	font-family: Courier, monospace;
 }
 
 .post_list_widget_form_fields_btns,
@@ -16,7 +21,22 @@
 	cursor:pointer;
 }
 
-.post_list_widget_form_btns span:hover {
+.post_list_widget_form_fields_btns span:hover,
+.post_list_widget_form_taxonomies_btns span:hover {
 	background:#ddd;
 	border:1px solid #ccc;
+}
+.post_list_widget_form_help {
+	display:inline;
+}
+.post_list_widget_form_help img{
+	margin:0 10px;
+	cursor:pointer;
+}
+.post_list_widget_form_help div{
+	display:none;
+	width:96%;
+	padding: 10px;
+  margin: 10px 0;
+	background:#eee;
 }
