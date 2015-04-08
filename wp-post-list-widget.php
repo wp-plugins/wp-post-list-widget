@@ -50,7 +50,7 @@ class Post_List_Widget extends WP_Widget {
 					$args['post_type']=$selected_types;
 				}
 
-print_r($args);
+//print_r($args);
 
 
 
