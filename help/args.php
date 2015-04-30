@@ -9,8 +9,9 @@ $args=array(
 	),
 );
 </pre></b>
-it will be used in <b><pre>new WP_Query( $args );</pre></b> command.
-Otherwise a default set of arguments will be used, which is:
+It will be used in <b><pre>new WP_Query( $args );</pre></b> command.<br/><br/>
+It will be a visible variable to use in template fields of this form.<br/> You can use the one above as <b>{{args['date_query'][0]['year']}}</b><br/><br/>
+If <b>$args</b> isn't set, a default value is used, which is:
 <b><pre><?php print_r($this->getDefaultArgs()); ?></pre></b>
 
 for more information see the <a href="https://codex.wordpress.org/Class_Reference/WP_Query" target="_new">reference</a>.

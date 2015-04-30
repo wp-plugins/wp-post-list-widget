@@ -26,7 +26,7 @@
 	background:#ddd;
 	border:1px solid #ccc;
 }
-.post_list_widget_form_help {
+.post_list_widget_form_help, .post_list_widget_form_help xmp {
 	display:inline;
 }
 .post_list_widget_form_help img{

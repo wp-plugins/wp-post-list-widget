@@ -37,7 +37,7 @@ class Post_List_Widget extends WP_Widget {
 				}
 				
 
-				// executing user's code that should contain the array of  $args array
+				// executing user's code that cand contain array  $args
 				if ($instance['use_custom_args']=="1") {
 					eval ($instance['custom_args']);
 				}
@@ -50,10 +50,7 @@ class Post_List_Widget extends WP_Widget {
 					$args['post_type']=$selected_types;
 				}
 
-//print_r($args);
-
-
-
+				
 				global $post;
 				$original_post = $post;
 
@@ -67,17 +64,17 @@ class Post_List_Widget extends WP_Widget {
 						$instance['template']=$default["template"];
 						$instance['after_template']=$default["after"];
 					}
-				  if (!$instance['script']) $output.=$this->subst($instance['before_template']);
+				  if (!$instance['script']) $output.=$this->subst($instance['before_template'],$args);
 				  $i=0;
 					while ( $query->have_posts() ) {
 						$query->the_post();
 						$template=$instance['template'];
-						if ($instance['script'] && $instance['script_var']!="") $arr[]=$this->getArrItem($template); else $output.=$this->subst($template);
+						if ($instance['script'] && $instance['script_var']!="") $arr[]=$this->getArrItem($template); else $output.=$this->subst($template,$args);
 					}
 					if ($instance['script'] && $instance['script_var']!="") echo "<script> var ".$instance['script_var']."=".json_encode($arr)."</script>";
-				  if (!$instance['script']) $output.=$this->subst($instance['after_template']);
+				  if (!$instance['script']) $output.=$this->subst($instance['after_template'],$args);
 				} else {
-					$output.=$this->subst($instance['no_posts']);
+					$output.=$this->subst($instance['no_posts'],$args);
 				}
 
 				$post = $original_post;
@@ -131,8 +128,33 @@ class Post_List_Widget extends WP_Widget {
 				return $item;
   		    }
 
+            const MY_EXCERPT_DEAFULT_LENGTH = 20;
+            const MY_EXCERPT_DEAFULT_MORE = '[...]';
+            const MY_EXCERPT_DEAFULT_TAGS = '<p><strong><b><br>';
+
+            function my_excerpt($args){
+                $args=explode('|',$args);
+                if (!isset($args[0]) || !is_numeric($args[0])) $args[0]=self::MY_EXCERPT_DEAFULT_LENGTH;
+                if (!isset($args[1])) $args[1]=self::MY_EXCERPT_DEAFULT_MORE;
+                if (!isset($args[2])) $args[2]=self::MY_EXCERPT_DEAFULT_TAGS;
+                global $post;
+                if ( '' == $text ) {
+                        $text = get_the_content('');
+                        $text = apply_filters('the_content', $text);
+                        $text = str_replace('\]\]\>', ']]&gt;', $text);
+                        $text = preg_replace('@<script[^>]*?>.*?</script>@si', '', $text);
+                        $text = strip_tags($text, $args[2]);
+                        $words = explode(' ', $text, $args[0] + 1);
+                        if (count($words)> $args[0]) {
+                                array_pop($words);
+                                array_push($words, $args[1]);
+                                $text = implode(' ', $words);
+                        }
+                }
+                return $text;
+            }
 		
-			private function subst ($str) {
+			private function subst ($str,$args) {
 				global $post;
 				$common=$this->get_common_fields();
 				$custom=get_post_custom_keys($post->ID);
@@ -175,6 +197,18 @@ class Post_List_Widget extends WP_Widget {
 				
 				$str = preg_replace_callback("/\{\{PHP_(.*)\}\}/Usi",function($m){return $_GET[$m[1]];},$str);
 
+//				$str = preg_replace_callback("/\{\{(\$args\[.*\])\}\}/Usi",function($m){return $$m[1];},$str);
+
+				$str = preg_replace_callback("/\{\{(args.*)\}\}/Usi",function($m)use($args){
+				    eval ('$s= $'.$m[1].";");
+				    return $s;
+				    },$str);
+
+
+                // improved excerpt subst:
+                $that=$this;
+				$str = preg_replace_callback("/\{\{excerpt\|(.*)\}\}/Usi",function($m)use($that){return $that->my_excerpt($m[1]);},$str);
+
 
 				$str = preg_replace_callback("/\{\{(.*)\}\}/Usi",function($matches)use($common,$custom,$taxonomies,$post){
 					if (array_key_exists($matches[1],$common)){
@@ -198,7 +232,7 @@ class Post_List_Widget extends WP_Widget {
 			}
 					
 			private function get_common_fields(){
-				$get_the_fields="ID,title,content,excerpt,author,post_thumbnail,category,author_posts,tag_list,time,modified_time";
+				$get_the_fields="ID,title,content,excerpt,author,post_thumbnail,category,author_posts,tag_list,date,time,modified_time";
 				//$a=array();
 				foreach(explode(",",$get_the_fields) as $f)$a[$f]=array("get_the_".$f);
 			    $a["type"]=array("get_post_type","id");
@@ -298,7 +332,8 @@ class Post_List_Widget extends WP_Widget {
 				echo '<div class="post_list_widget_form_fields_btns">';
 				foreach ($common as $c=>$v) echo ' <span>{{'.$c.'}}</span>';
 				echo '</div>';
-
+            
+            $this->get_help('common-fields');
 
   			echo '<br/>After:<br/><textarea id="'.$this->get_field_id( 'after_template' ).'" name="'.$this->get_field_name( 'after_template' ).'" rows=1>'.$instance['after_template'].'</textarea></div></div>';
   			echo '<br/>To print if the list is empty:<br/><textarea id="'.$this->get_field_id( 'no_posts' ).'" name="'.$this->get_field_name( 'no_posts' ).'" rows=1>'.$instance['no_posts'].'</textarea></div>';
