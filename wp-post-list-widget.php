@@ -6,7 +6,7 @@ Plugin Name: WP Post List Widget
 Plugin URI: http://wordpress.org/plugins/wp-post-list-widget/
 Description: This creates a list of posts of custom type.
 Author: Al Stern
-Version: 1.0
+Version: 1.1
 */
 
 class Post_List_Widget extends WP_Widget {
