@@ -6,7 +6,7 @@ Plugin Name: WP Post List Widget
 Plugin URI: http://wordpress.org/plugins/wp-post-list-widget/
 Description: This creates a list of posts of custom type.
 Author: Al Stern
-Version: 1.1
+Version: 1.2
 */
 
 class Post_List_Widget extends WP_Widget {
@@ -211,14 +211,41 @@ class Post_List_Widget extends WP_Widget {
 
 
 				$str = preg_replace_callback("/\{\{(.*)\}\}/Usi",function($matches)use($common,$custom,$taxonomies,$post){
-					if (array_key_exists($matches[1],$common)){
-						if (isset($common[$matches[1]][1])) {
-							if ($common[$matches[1]][1]=="id") return call_user_func($common[$matches[1]][0],$post->ID);
-						} else return call_user_func($common[$matches[1]][0]);
-    				} else if (count($custom) && in_array($matches[1],$custom)){
-						return implode(",",get_post_custom_values($matches[1]));
-    				} else if (count($taxonomies) && in_array($matches[1],$taxonomies)){
-                        $terms=get_the_terms($post->ID,$matches[1]); $s="";
+				    $matches=explode("|",$matches[1]);
+					if (array_key_exists($matches[0],$common)){
+						if (isset($common[$matches[0]][1])) {
+							if ($common[$matches[0]][1]=="id") return call_user_func($common[$matches[0]][0],$post->ID);
+						} else return call_user_func($common[$matches[0]][0]);
+    				} else if (count($custom) && in_array($matches[0],$custom)){  
+    				    switch (count($matches)){
+    				        case 1:	return implode(',',get_post_custom_values($matches[0])); break;     // without parameters separated by ,
+    				        case 2: // one parameter
+    				            if (is_numeric($matches[1])){  // if number, return one value
+    				                if ($matches[1]<0) $matches[1]=count(get_post_custom_values($matches[0]))+$matches[1];
+    				            	return get_post_custom_values($matches[0])[$matches[1]];
+    				            } else return implode($matches[1],get_post_custom_values($matches[0])); // if not a numer, return all 
+    				        break;
+    				        case 3: // two parameters 
+    				            return $matches[1].implode($matches[2].$matches[1],get_post_custom_values($matches[0])).$matches[2]; // returns all embraced with parameters
+    				        break;
+    				        case 4: // three parameters 
+    				            if (is_numeric($matches[1])){
+    				                if (is_numeric($matches[2])) 
+    				                    return implode($matches[3], array_slice(get_post_custom_values($matches[0]),$matches[1],$matches[2]) ); // returns a subset joined by the last parameter
+    				                else return implode($matches[3], array_slice(get_post_custom_values($matches[0]),$matches[1]) );  // same, but without one argument
+    				            }
+    				        break;
+    				        case 5: // four parameters 
+    				            if (is_numeric($matches[1])){
+    				                if (is_numeric($matches[2])) 
+    				                    return $matches[3].implode($matches[4].$matches[3], array_slice(get_post_custom_values($matches[0]),$matches[1],$matches[2]) ).$matches[4]; // returns a subset embraced with parameters
+    				                else return $matches[3].implode($matches[4].$matches[3], array_slice(get_post_custom_values($matches[0]),$matches[1]) ).$matches[4];  // same, but without one argument
+    				            }
+    				        break;
+    				        
+    				    }
+    				} else if (count($taxonomies) && in_array($matches[0],$taxonomies)){
+                        $terms=get_the_terms($post->ID,$matches[0]); $s="";
                         if ($terms) foreach ($terms as $t) $s.=$t->slug.',';
 						return substr($s,0,-1);
 					} else {
