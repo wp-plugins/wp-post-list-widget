@@ -6,7 +6,7 @@ Plugin Name: WP Post List Widget
 Plugin URI: http://wordpress.org/plugins/wp-post-list-widget/
 Description: This creates a list of posts of custom type.
 Author: Al Stern
-Version: 1.2
+Version: 1.3
 */
 
 class Post_List_Widget extends WP_Widget {
@@ -222,7 +222,8 @@ class Post_List_Widget extends WP_Widget {
     				        case 2: // one parameter
     				            if (is_numeric($matches[1])){  // if number, return one value
     				                if ($matches[1]<0) $matches[1]=count(get_post_custom_values($matches[0]))+$matches[1];
-    				            	return get_post_custom_values($matches[0])[$matches[1]];
+    				                $values=get_post_custom_values($matches[0]);
+    				            	return $values[$matches[1]];
     				            } else return implode($matches[1],get_post_custom_values($matches[0])); // if not a numer, return all 
     				        break;
     				        case 3: // two parameters 
